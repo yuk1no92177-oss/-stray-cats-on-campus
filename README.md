@@ -16,5 +16,6 @@
 4. 启动前端：打开 frontend/index.html
 
 ## 接口入口
-接口文档地址：/docs/api.md
-后端服务：http://localhost:3000
+- 接口文档：[`docs/api.md`](./docs/api.md)
+- 后端服务本地地址：`http://localhost:3000`
+- 接口前缀：`/api`
