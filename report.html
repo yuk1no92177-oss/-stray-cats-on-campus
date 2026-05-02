@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>喵迹 - 打卡与上报</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.3.4.3.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.1.0.7.js"></script>
+<style>
+        @font-face { font-family: 'PingFang SC'; src: local('PingFang SC'); }
+        body { font-family: 'PingFang SC', sans-serif; background-color: #F8F9FA; }
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+</head>
+<body class="flex justify-center items-center h-screen bg-gray-200">
+<div class="w-[375px] h-[812px] bg-white rounded-[40px] shadow-2xl overflow-hidden relative border-[8px] border-gray-800 flex flex-col">
+<!-- Header -->
+<div class="px-6 pt-12 pb-4 bg-white">
+<h1 class="text-2xl font-black text-gray-900">打卡上报</h1>
+<p class="text-xs text-gray-500 mt-1">记录猫咪现状，守护校园精灵</p>
+</div>
+<div class="flex-1 overflow-y-auto px-6 pb-32">
+<!-- 紧急上报入口 -->
+<div class="bg-red-50 rounded-2xl p-4 mb-6 border border-red-100 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white">
+<iconify-icon class="text-xl" icon="ph:first-aid-bold"></iconify-icon>
+</div>
+<div>
+<h4 class="text-red-700 font-bold text-sm">医疗紧急救助</h4>
+<p class="text-red-600/70 text-[10px]">发现受伤、生病猫咪请点此</p>
+</div>
+</div>
+<iconify-icon class="text-red-300" icon="lucide:chevron-right"></iconify-icon>
+</div>
+<form class="space-y-6">
+<!-- 1. 选择猫咪 -->
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">1. 你见到了哪只小猫？</label>
+<div class="relative">
+<select class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm appearance-none outline-none focus:ring-2 focus:ring-orange-500/20">
+<option>请选择猫咪</option>
+<option selected="">胖虎 (橘猫)</option>
+<option>警长 (奶牛猫)</option>
+<option>点点 (三花)</option>
+<option>遇见了新猫咪！</option>
+</select>
+<iconify-icon class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" icon="lucide:chevron-down"></iconify-icon>
+</div>
+</div>
+<!-- 2. 上传照片 -->
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">2. 上传猫咪美照/现状</label>
+<div class="grid grid-cols-3 gap-3">
+<div class="aspect-square bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400">
+<iconify-icon class="text-2xl" icon="lucide:camera"></iconify-icon>
+<span class="text-[8px] mt-1">添加照片</span>
+</div>
+<div class="aspect-square bg-gray-100 rounded-xl overflow-hidden">
+<img alt="Preview" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-04-22/3b70b055cd0748c2b53c2c4ca35a59cb.jpg"/>
+</div>
+</div>
+</div>
+<!-- 3. 健康状态 -->
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">3. 猫咪看起来怎么样？</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 bg-orange-500 text-white rounded-full text-xs font-bold border border-orange-500" type="button">非常精神</button>
+<button class="px-4 py-2 bg-white text-gray-500 rounded-full text-xs font-bold border border-gray-200" type="button">一般</button>
+<button class="px-4 py-2 bg-white text-gray-500 rounded-full text-xs font-bold border border-gray-200" type="button">有点萎靡</button>
+<button class="px-4 py-2 bg-white text-gray-500 rounded-full text-xs font-bold border border-gray-200" type="button">食欲不振</button>
+</div>
+</div>
+<!-- 4. 地点 -->
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">4. 出现地点</label>
+<div class="bg-gray-50 rounded-xl p-3 flex items-center justify-between border border-gray-100">
+<div class="flex items-center gap-2">
+<iconify-icon class="text-orange-500" icon="ph:map-pin-fill"></iconify-icon>
+<span class="text-xs text-gray-600">西校区图书馆正门附近</span>
+</div>
+<button class="text-[10px] text-orange-600 font-bold" type="button">重新定位</button>
+</div>
+</div>
+<!-- 5. 备注 -->
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">5. 补充备注</label>
+<textarea class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-orange-500/20 h-24" placeholder="是否有喂食？有没有被欺负？或者它今天心情如何？"></textarea>
+</div>
+<!-- Submit Button -->
+<button class="w-full bg-orange-500 text-white py-4 rounded-2xl font-black shadow-lg shadow-orange-200 hover:bg-orange-600 transition-colors" type="button">
+                    提交巡护打卡
+                </button>
+</form>
+</div>
+<!-- 底部导航 -->
+<div class="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around items-center pt-3 pb-6 safe-area-bottom">
+<a class="flex flex-col items-center gap-1 text-gray-400" href="index.html">
+<iconify-icon class="text-2xl" icon="ph:map-trifold"></iconify-icon>
+<span class="text-[10px]">地图</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="wiki.html">
+<iconify-icon class="text-2xl" icon="ph:books"></iconify-icon>
+<span class="text-[10px]">图鉴</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-orange-500" href="report.html">
+<div class="w-12 h-12 bg-orange-500 rounded-full -mt-10 border-4 border-white shadow-lg flex items-center justify-center text-white">
+<iconify-icon class="text-2xl" icon="lucide:check"></iconify-icon>
+</div>
+<span class="text-[10px] font-bold mt-1">已打卡</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="wiki.html">
+<iconify-icon class="text-2xl" icon="ph:crown"></iconify-icon>
+<span class="text-[10px]">成就</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="profile.html">
+<iconify-icon class="text-2xl" icon="ph:user"></iconify-icon>
+<span class="text-[10px]">我的</span>
+</a>
+</div>
+</div>
+</body>
+</html>

@@ -122,12 +122,12 @@ CREATE TABLE IF NOT EXISTS favorites (
 
 -- 插入初始猫咪数据（河海大学江宁校区 主校区坐标中心: 31.9139°N, 118.7862°E）
 INSERT INTO cats (cat_name, color, gender, age, character_desc, health_status, is_neutered, location, longitude, latitude, area, photo_url) VALUES
-('胖虎', '橘色', '公', '3岁', '沉稳亲人，逸夫图书馆常驻馆长', '健康', 1, '逸夫图书馆正门台阶', 118.7808, 31.9156, '', 'https://modao.cc/agent-py/media/generated_images/2026-04-22/b059b38548ba4402aa3a02a18be96222.jpg'),
-('警长', '黑白奶牛', '公', '2岁', '机警敏捷，喜欢在致高楼A座天井活动', '健康', 1, '致高楼A座天井', 118.7845, 31.9138, '', 'https://modao.cc/agent-py/media/generated_images/2026-04-22/9b6bc7ccdec840b7ac4dd3b0beec9f92.jpg'),
-('点点', '三花', '母', '1.5岁', '胆小亲人，喜欢被摸头但怕大声', '健康', 0, '东操场看台下方', 118.7885, 31.9120, '', 'https://modao.cc/agent-py/media/generated_images/2026-04-22/9b6bc7ccdec840b7ac4dd3b0beec9f92.jpg'),
-('小灰', '灰色', '公', '4岁', '佛系淡定，校内元老级猫咪，常在叠翠山出没', '健康', 1, '叠翠山草坪', 118.7840, 31.9145, '', 'https://modao.cc/agent-py/media/generated_images/2026-04-22/9b6bc7ccdec840b7ac4dd3b0beec9f92.jpg'),
-('奥利奥', '黑白长毛', '公', '2岁', '优雅粘人，喜欢坐在宿舍门口等人', '健康', 1, '骏园宿舍区', 118.7790, 31.9105, '', 'https://modao.cc/agent-py/media/generated_images/2026-04-22/9b6bc7ccdec840b7ac4dd3b0beec9f92.jpg'),
-('小橘白', '橘白', '母', '1岁', '活泼好动，清晨常在食堂附近活动', '需关注', 0, '新食堂东侧', 118.7855, 31.9118, '', 'https://modao.cc/agent-py/media/generated_images/2026-04-22/9b6bc7ccdec840b7ac4dd3b0beec9f92.jpg');
+('胖虎', '橘色', '公', '3岁', '沉稳亲人，逸夫图书馆常驻馆长', '健康', 1, '逸夫图书馆正门台阶', 118.7808, 31.9156, '', ''),
+('警长', '黑白奶牛', '公', '2岁', '机警敏捷，喜欢在致高楼A座天井活动', '健康', 1, '致高楼A座天井', 118.7845, 31.9138, '', ''),
+('点点', '三花', '母', '1.5岁', '胆小亲人，喜欢被摸头但怕大声', '健康', 0, '东操场看台下方', 118.7885, 31.9120, '', ''),
+('小灰', '灰色', '公', '4岁', '佛系淡定，校内元老级猫咪，常在叠翠山出没', '健康', 1, '叠翠山草坪', 118.7840, 31.9145, '', ''),
+('奥利奥', '黑白长毛', '公', '2岁', '优雅粘人，喜欢坐在宿舍门口等人', '健康', 1, '骏园宿舍区', 118.7790, 31.9105, '', ''),
+('小橘白', '橘白', '母', '1岁', '活泼好动，清晨常在食堂附近活动', '需关注', 0, '新食堂东侧', 118.7855, 31.9118, '', '');
 
 -- 插入初始管理员账号（密码: admin123，需在应用启动时bcrypt处理）
 INSERT INTO users (username, password, nickname, role) VALUES

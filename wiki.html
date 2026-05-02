@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>喵迹 - 校园猫咪图鉴</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.3.4.3.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.1.0.7.js"></script>
+<style>
+        @font-face { font-family: 'PingFang SC'; src: local('PingFang SC'); }
+        body { font-family: 'PingFang SC', sans-serif; background-color: #F8F9FA; }
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        .custom-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="flex justify-center items-center h-screen bg-gray-200">
+<div class="w-[375px] h-[812px] bg-white rounded-[40px] shadow-2xl overflow-hidden relative border-[8px] border-gray-800 flex flex-col">
+<!-- Header -->
+<div class="px-6 pt-12 pb-4 bg-white sticky top-0 z-20">
+<h1 class="text-2xl font-black text-gray-900">校园猫咪图鉴</h1>
+<p class="text-xs text-gray-500 mt-1">当前已解锁 12/24 只小猫</p>
+<div class="mt-4 flex gap-2 overflow-x-auto custom-scrollbar">
+<button class="px-4 py-2 bg-orange-500 text-white rounded-full text-xs font-bold shrink-0">全部</button>
+<button class="px-4 py-2 bg-gray-100 text-gray-500 rounded-full text-xs font-bold shrink-0">西校区</button>
+<button class="px-4 py-2 bg-gray-100 text-gray-500 rounded-full text-xs font-bold shrink-0">东校区</button>
+<button class="px-4 py-2 bg-gray-100 text-gray-500 rounded-full text-xs font-bold shrink-0">待领养</button>
+</div>
+</div>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto px-4 pb-32">
+<!-- 集章进度展示 -->
+<div class="bg-gradient-to-r from-orange-400 to-orange-500 rounded-2xl p-4 mb-6 shadow-md relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="text-white font-bold text-sm">校园集章进度</h3>
+<div class="flex items-center gap-2 mt-2">
+<div class="flex-1 h-2 bg-white/30 rounded-full overflow-hidden">
+<div class="w-1/2 h-full bg-white rounded-full"></div>
+</div>
+<span class="text-white text-[10px] font-bold">50%</span>
+</div>
+<p class="text-white/80 text-[10px] mt-2">再发现 3 只猫咪可获得“初级铲屎官”勋章</p>
+</div>
+<iconify-icon class="absolute -right-2 -bottom-2 text-white/20 text-7xl" icon="ph:crown-fill"></iconify-icon>
+</div>
+<!-- 猫咪列表 -->
+<div class="grid grid-cols-2 gap-4">
+<!-- 猫咪卡片 1 -->
+<a class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden" href="detail.html">
+<div class="relative h-32">
+<img alt="Cat" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-04-22/9b6bc7ccdec840b7ac4dd3b0beec9f92.jpg"/>
+<span class="absolute top-2 right-2 bg-orange-500/80 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-full">橘猫</span>
+</div>
+<div class="p-3">
+<h4 class="font-bold text-gray-800">胖虎</h4>
+<div class="flex items-center gap-1 mt-1">
+<iconify-icon class="text-gray-400 text-[10px]" icon="ph:map-pin"></iconify-icon>
+<span class="text-gray-400 text-[10px]">图书馆/西区</span>
+</div>
+<div class="mt-2 flex gap-1">
+<span class="bg-green-50 text-green-600 text-[8px] px-1.5 py-0.5 rounded">健康</span>
+<span class="bg-blue-50 text-blue-600 text-[8px] px-1.5 py-0.5 rounded">已绝育</span>
+</div>
+</div>
+</a>
+<!-- 猫咪卡片 2 -->
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+<div class="relative h-32">
+<img alt="Cat" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-04-22/9b6bc7ccdec840b7ac4dd3b0beec9f92.jpg"/>
+<span class="absolute top-2 right-2 bg-gray-500/80 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-full">奶牛</span>
+</div>
+<div class="p-3">
+<h4 class="font-bold text-gray-800">警长</h4>
+<div class="flex items-center gap-1 mt-1">
+<iconify-icon class="text-gray-400 text-[10px]" icon="ph:map-pin"></iconify-icon>
+<span class="text-gray-400 text-[10px]">一教/天井</span>
+</div>
+<div class="mt-2 flex gap-1">
+<span class="bg-green-50 text-green-600 text-[8px] px-1.5 py-0.5 rounded">健康</span>
+</div>
+</div>
+</div>
+<!-- 猫咪卡片 3 (灰色/未锁定感) -->
+<div class="bg-gray-50 rounded-2xl border border-gray-100 shadow-sm overflow-hidden relative">
+<div class="relative h-32 bg-gray-200 flex items-center justify-center grayscale">
+<iconify-icon class="text-gray-400 text-3xl" icon="ph:question"></iconify-icon>
+</div>
+<div class="p-3">
+<h4 class="font-bold text-gray-400">尚未解锁</h4>
+<div class="flex items-center gap-1 mt-1">
+<iconify-icon class="text-gray-300 text-[10px]" icon="ph:map-pin"></iconify-icon>
+<span class="text-gray-300 text-[10px]">东校区某处</span>
+</div>
+</div>
+</div>
+<!-- 猫咪卡片 4 -->
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+<div class="relative h-32">
+<img alt="Cat" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-04-22/9b6bc7ccdec840b7ac4dd3b0beec9f92.jpg"/>
+<span class="absolute top-2 right-2 bg-gray-400/80 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-full">三花</span>
+</div>
+<div class="p-3">
+<h4 class="font-bold text-gray-800">点点</h4>
+<div class="flex items-center gap-1 mt-1">
+<iconify-icon class="text-gray-400 text-[10px]" icon="ph:map-pin"></iconify-icon>
+<span class="text-gray-400 text-[10px]">操场/看台</span>
+</div>
+<div class="mt-2 flex gap-1">
+<span class="bg-orange-50 text-orange-600 text-[8px] px-1.5 py-0.5 rounded">亲人</span>
+</div>
+</div>
+</div>
+<!-- 猫咪卡片 5 -->
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+<div class="relative h-32">
+<img alt="Cat" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-04-22/9b6bc7ccdec840b7ac4dd3b0beec9f92.jpg"/>
+<span class="absolute top-2 right-2 bg-blue-500/80 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-full">长毛</span>
+</div>
+<div class="p-3">
+<h4 class="font-bold text-gray-800">奥利奥</h4>
+<div class="flex items-center gap-1 mt-1">
+<iconify-icon class="text-gray-400 text-[10px]" icon="ph:map-pin"></iconify-icon>
+<span class="text-gray-400 text-[10px]">宿管站旁</span>
+</div>
+<div class="mt-2 flex gap-1">
+<span class="bg-green-50 text-green-600 text-[8px] px-1.5 py-0.5 rounded">健康</span>
+</div>
+</div>
+</div>
+<!-- 更多占位... -->
+</div>
+</div>
+<!-- 底部导航 -->
+<div class="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around items-center pt-3 pb-6 safe-area-bottom">
+<a class="flex flex-col items-center gap-1 text-gray-400" href="index.html">
+<iconify-icon class="text-2xl" icon="ph:map-trifold"></iconify-icon>
+<span class="text-[10px]">地图</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-orange-500" href="wiki.html">
+<iconify-icon class="text-2xl" icon="ph:books-fill"></iconify-icon>
+<span class="text-[10px] font-bold">图鉴</span>
+</a>
+<a class="flex flex-col items-center gap-1" href="report.html">
+<div class="w-12 h-12 bg-orange-500 rounded-full -mt-10 border-4 border-white shadow-lg flex items-center justify-center text-white">
+<iconify-icon class="text-2xl" icon="lucide:plus"></iconify-icon>
+</div>
+<span class="text-[10px] text-gray-400 mt-1">打卡</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="wiki.html">
+<iconify-icon class="text-2xl" icon="ph:crown"></iconify-icon>
+<span class="text-[10px]">成就</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="profile.html">
+<iconify-icon class="text-2xl" icon="ph:user"></iconify-icon>
+<span class="text-[10px]">我的</span>
+</a>
+</div>
+</div>
+</body>
+</html>
