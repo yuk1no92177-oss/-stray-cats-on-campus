@@ -42,7 +42,14 @@ app.get('/api/health', async (req, res) => {
     const [db] = await pool.query('SELECT DATABASE() AS db');
     res.json({ code: 200, db: db[0].db, pool: 'ok' });
   } catch (err) {
-    res.status(500).json({ code: 500, msg: '数据库连接失败', error: err.message, stack: err.stack?.split('\n').slice(0,3).join('; ') });
+    const info = { code: 500, msg: '数据库连接失败' };
+    if (err instanceof AggregateError) {
+      info.errors = err.errors.map(e => ({ code: e.code, message: e.message, sql: e.sql }));
+    } else {
+      info.error = err.message;
+      info.code2 = err.code;
+    }
+    res.status(500).json(info);
   }
 });
 
