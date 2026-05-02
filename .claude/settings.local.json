@@ -67,7 +67,9 @@
       "Bash(git commit *)",
       "Bash(git push *)",
       "Bash(git remote *)",
-      "WebFetch(domain:docs.pingcap.com)"
+      "WebFetch(domain:docs.pingcap.com)",
+      "Bash(node scripts/fix-admin.js)",
+      "WebFetch(domain:stray-cats.onrender.com)"
     ]
   }
 }

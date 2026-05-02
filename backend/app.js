@@ -35,6 +35,17 @@ async function initAdmin() {
   }
 }
 
+// 诊断端点
+app.get('/api/health', async (req, res) => {
+  try {
+    const [result] = await pool.query('SELECT 1 AS test');
+    const [db] = await pool.query('SELECT DATABASE() AS db');
+    res.json({ code: 200, db: db[0].db, pool: 'ok' });
+  } catch (err) {
+    res.status(500).json({ code: 500, msg: '数据库连接失败', error: err.message, stack: err.stack?.split('\n').slice(0,3).join('; ') });
+  }
+});
+
 // 路由
 app.use('/api/cats', require('./routes/cats'));
 app.use('/api/users', require('./routes/users'));
