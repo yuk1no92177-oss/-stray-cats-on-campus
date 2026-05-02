@@ -5,7 +5,14 @@ const bcrypt = require('bcryptjs');
 const pool = require('./config/db');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
+// 确保上传目录存在
+const fs = require('fs');
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 // 中间件
 app.use(cors());
