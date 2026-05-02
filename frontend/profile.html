@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>喵迹 - 个人中心</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="top-bar" style="background:linear-gradient(135deg,#f97316,#ea580c);">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <h1>个人中心</h1>
+    <button onclick="Auth.logout()" style="margin-left:auto;background:rgba(255,255,255,0.2);color:white;border:none;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;">退出</button>
+  </div>
+</div>
+
+<div class="page-container" style="padding-top:20px;padding-bottom:100px;">
+  <div id="profileContent">
+    <div class="loading"></div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+    <span>地图</span>
+  </a>
+  <a href="wiki.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+    <span>图鉴</span>
+  </a>
+  <a href="report.html">
+    <div class="report-btn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <span style="margin-top:2px;">打卡</span>
+  </a>
+  <a href="dashboard.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    <span>看板</span>
+  </a>
+  <a href="profile.html" class="active">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    <span>我的</span>
+  </a>
+</nav>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+async function loadProfile() {
+  if (!Auth.isLoggedIn()) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const res = await Auth.getProfile();
+  if (res.code !== 200) {
+    document.getElementById('profileContent').innerHTML = '<div class="empty-state"><p>加载失败</p></div>';
+    return;
+  }
+
+  const u = res.data;
+  const initials = (u.nickname || u.username)[0];
+
+  document.getElementById('profileContent').innerHTML = `
+    <!-- 用户信息 -->
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f97316,#fbbf24);display:flex;align-items:center;justify-content:center;color:white;font-size:28px;font-weight:700;">${initials}</div>
+      <div style="flex:1;">
+        <h2 style="font-size:20px;font-weight:800;">${u.nickname || u.username}</h2>
+        <p style="font-size:12px;color:#9ca3af;margin-top:2px;">
+          ${u.role === 'admin' ? '🛡️ 管理员' : '🐱 铲屎官'}
+          ${u.create_time ? ' · 加入于 ' + new Date(u.create_time).toLocaleDateString('zh-CN') : ''}
+        </p>
+      </div>
+      ${u.role === 'admin' ? '<a href="admin.html" class="btn btn-sm btn-primary">管理后台</a>' : ''}
+    </div>
+
+    <!-- 统计数据 -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
+      <div style="background:#fff7ed;border-radius:12px;padding:16px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:#ea580c;">${u.reportCount || 0}</div>
+        <div style="font-size:11px;color:#9ca3af;">打卡</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:12px;padding:16px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:#16a34a;">${u.feedCount || 0}</div>
+        <div style="font-size:11px;color:#9ca3af;">投喂</div>
+      </div>
+      <div style="background:#eff6ff;border-radius:12px;padding:16px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:#2563eb;">${u.unlockedCatCount || 0}</div>
+        <div style="font-size:11px;color:#9ca3af;">解锁图鉴</div>
+      </div>
+    </div>
+
+    <!-- 勋章墙 -->
+    <div style="margin-bottom:24px;">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">🏅 成就勋章墙</h3>
+      <div id="badgeWall" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div class="loading"></div>
+      </div>
+    </div>
+
+    <!-- 菜单列表 -->
+    <div style="border-radius:16px;border:1px solid #f3f4f6;overflow:hidden;">
+      <a href="wiki.html" style="display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #f3f4f6;text-decoration:none;color:inherit;">
+        <span style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:20px;">❤️</span>
+          <span style="font-size:14px;color:#374151;">我关注的猫咪</span>
+        </span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+      <a href="#" onclick="showMyReports()" style="display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #f3f4f6;text-decoration:none;color:inherit;">
+        <span style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:20px;">📋</span>
+          <span style="font-size:14px;color:#374151;">我的打卡记录</span>
+        </span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px;cursor:pointer;" onclick="showFeedback()">
+        <span style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:20px;">💬</span>
+          <span style="font-size:14px;color:#374151;">意见反馈</span>
+        </span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+    </div>
+
+    <!-- 打卡记录列表 -->
+    <div id="myReports" style="display:none;margin-top:24px;">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📋 我的打卡记录</h3>
+      <div id="reportsList"></div>
+    </div>
+  `;
+
+  loadBadges();
+}
+
+async function loadBadges() {
+  const allBadges = [
+    { id: 1, name: '初露锋芒', desc: '首次打卡', icon: '🏅', condition: 'report_count', condition_value: 1 },
+    { id: 2, name: '寻猫先锋', desc: '打卡10只不同猫咪', icon: '🐾', condition: 'cat_unlocked', condition_value: 10 },
+    { id: 3, name: '热心铲屎官', desc: '累计打卡20次', icon: '📋', condition: 'report_count', condition_value: 20 },
+    { id: 4, name: '投喂达人', desc: '投喂记录50次', icon: '🍽️', condition: 'feed_count', condition_value: 50 },
+    { id: 5, name: '急救天使', desc: '上报3次救助', icon: '🏥', condition: 'report_count', condition_value: 3 },
+    { id: 6, name: '校园卫士', desc: '连续活跃30天', icon: '🛡️', condition: 'days_active', condition_value: 30 },
+  ];
+
+  const res = await Auth.getProfile();
+  const userBadges = res.code === 200 ? (res.data.badges || []).map(b => b.badge_id) : [];
+
+  const wall = document.getElementById('badgeWall');
+  wall.innerHTML = allBadges.map(b => {
+    const unlocked = userBadges.includes(b.id);
+    return `
+      <div style="text-align:center;padding:12px;background:${unlocked ? '#fef3c7' : '#f9fafb'};border-radius:12px;border:2px solid ${unlocked ? '#fbbf24' : '#e5e7eb'};${unlocked ? '' : 'filter:grayscale(1);opacity:0.4;'}">
+        <div style="font-size:28px;margin-bottom:4px;">${b.icon}</div>
+        <div style="font-size:11px;font-weight:600;color:${unlocked ? '#92400e' : '#9ca3af'};">${b.name}</div>
+        <div style="font-size:9px;color:#9ca3af;margin-top:2px;">${b.desc}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function showMyReports() {
+  const el = document.getElementById('myReports');
+  const list = document.getElementById('reportsList');
+  if (el.style.display !== 'none') { el.style.display = 'none'; return; }
+
+  el.style.display = 'block';
+  list.innerHTML = '<div class="loading"></div>';
+
+  const res = await API.get('/reports/mine');
+  if (res.code !== 200) { list.innerHTML = '<div class="empty-state"><p>加载失败</p></div>'; return; }
+
+  if (res.data.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af;">暂无打卡记录</div>';
+    return;
+  }
+
+  list.innerHTML = res.data.map(r => `
+    <div style="display:flex;gap:12px;padding:12px;background:#f9fafb;border-radius:12px;margin-bottom:8px;">
+      ${r.cat_photo ? `<img src="${r.cat_photo}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;">` : ''}
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-weight:600;font-size:13px;">${r.cat_name || '未知猫咪'}</span>
+          <span class="tag ${r.status === '已通过' ? 'tag-green' : r.status === '已驳回' ? 'tag-red' : 'tag-orange'}">${r.status}</span>
+        </div>
+        <p style="font-size:11px;color:#6b7280;margin-top:2px;">${r.location || ''} · ${new Date(r.create_time).toLocaleString('zh-CN')}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showFeedback() {
+  alert('感谢你的反馈！如有问题请联系管理员。');
+}
+
+loadProfile();
+</script>
+</body>
+</html>

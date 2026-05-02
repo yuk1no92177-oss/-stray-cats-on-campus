@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>喵迹 - 数据看板</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>数据看板</h1>
+  <p>校园流浪猫数据统计</p>
+</div>
+
+<div class="page-container" style="padding-top:20px;padding-bottom:100px;">
+  <!-- 概览卡片 -->
+  <div id="overviewCards" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px;">
+    <div style="background:white;border-radius:16px;padding:16px;border:1px solid #f3f4f6;text-align:center;">
+      <div style="font-size:11px;color:#9ca3af;">猫咪总数</div>
+      <div id="statTotalCats" style="font-size:28px;font-weight:800;color:#1f2937;">-</div>
+    </div>
+    <div style="background:white;border-radius:16px;padding:16px;border:1px solid #f3f4f6;text-align:center;">
+      <div style="font-size:11px;color:#9ca3af;">累计打卡</div>
+      <div id="statTotalReports" style="font-size:28px;font-weight:800;color:#f97316;">-</div>
+    </div>
+    <div style="background:white;border-radius:16px;padding:16px;border:1px solid #f3f4f6;text-align:center;">
+      <div style="font-size:11px;color:#9ca3af;">投喂总数</div>
+      <div id="statTotalFeeds" style="font-size:28px;font-weight:800;color:#16a34a;">-</div>
+    </div>
+    <div style="background:white;border-radius:16px;padding:16px;border:1px solid #f3f4f6;text-align:center;">
+      <div style="font-size:11px;color:#9ca3af;">注册用户</div>
+      <div id="statTotalUsers" style="font-size:28px;font-weight:800;color:#2563eb;">-</div>
+    </div>
+  </div>
+
+  <!-- 性别分布 -->
+  <div style="background:white;border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid #f3f4f6;">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📊 猫咪性别分布</h3>
+    <div id="genderDistText" style="font-size:13px;color:#6b7280;text-align:center;"></div>
+    <div id="genderChart" style="height:150px;display:flex;align-items:center;justify-content:center;gap:40px;margin-top:12px;">
+    </div>
+  </div>
+
+  <!-- 健康分布 -->
+  <div style="background:white;border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid #f3f4f6;">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">🏥 健康状况</h3>
+    <div id="healthChart" style="height:200px;"></div>
+    <div id="healthDistText" style="margin-top:8px;font-size:13px;color:#6b7280;text-align:center;"></div>
+  </div>
+
+  <!-- 近7天打卡趋势 -->
+  <div style="background:white;border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid #f3f4f6;">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📈 近7天打卡趋势</h3>
+    <div style="height:120px;"><canvas id="trendChart" style="width:100%;height:100%;"></canvas></div>
+  </div>
+
+  <!-- 明星猫咪榜 -->
+  <div style="background:white;border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid #f3f4f6;">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">🏆 明星猫咪榜</h3>
+    <div id="topCatsList"></div>
+  </div>
+
+  <!-- 积极用户榜 -->
+  <div style="background:white;border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid #f3f4f6;">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">🌟 积极用户榜</h3>
+    <div id="topUsersList"></div>
+  </div>
+
+  <!-- 热门投喂点 -->
+  <div style="background:white;border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid #f3f4f6;">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">🍽️ 热门投喂点 TOP5</h3>
+    <div id="topFeedsList"></div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+    <span>地图</span>
+  </a>
+  <a href="wiki.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+    <span>图鉴</span>
+  </a>
+  <a href="report.html">
+    <div class="report-btn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <span style="margin-top:2px;">打卡</span>
+  </a>
+  <a href="dashboard.html" class="active">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    <span>看板</span>
+  </a>
+  <a href="profile.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    <span>我的</span>
+  </a>
+</nav>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+let trendChartInstance = null;
+
+async function loadDashboard() {
+  const res = await API.get('/stats');
+  if (res.code !== 200) return;
+
+  const d = res.data;
+
+  // 概览数据
+  document.getElementById('statTotalCats').textContent = d.totalCats || 0;
+  document.getElementById('statTotalReports').textContent = d.totalReports || 0;
+  document.getElementById('statTotalFeeds').textContent = d.totalFeeds || 0;
+  document.getElementById('statTotalUsers').textContent = d.totalUsers || 0;
+
+  // 性别分布
+  renderGenderDistribution(d.genderDistribution || []);
+
+  // 健康分布
+  renderHealthDistribution(d.healthDistribution || []);
+
+  // 近7天趋势
+  renderTrend(d.weeklyReports || []);
+
+  // 明星猫咪
+  renderTopCats(d.topCats || []);
+
+  // 积极用户
+  renderTopUsers(d.topUsers || []);
+
+  // 热门投喂点
+  renderTopFeeds(d.topFeedLocations || []);
+}
+
+function renderGenderDistribution(data) {
+  const colors = { '公': '#3b82f6', '母': '#ec4899', '未知': '#9ca3af' };
+  const text = data.map(d => `${d.gender === '公' ? '♂' : d.gender === '母' ? '♀' : '?'} ${d.gender}: ${d.count}只`).join(' · ');
+  document.getElementById('genderDistText').textContent = `共 ${data.reduce((s,d) => s + d.count, 0)} 只猫咪`;
+
+  const chart = document.getElementById('genderChart');
+  chart.innerHTML = data.map(d => {
+    const color = colors[d.gender] || '#9ca3af';
+    const pct = data.reduce((s,x) => s + x.count, 0) > 0 ? Math.round(d.count / data.reduce((s,x) => s + x.count, 0) * 100) : 0;
+    return `
+      <div style="text-align:center;">
+        <div style="width:80px;height:80px;border-radius:50%;background:conic-gradient(${color} 0% ${pct}%, #f3f4f6 ${pct}% 100%);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:${color};">
+          ${d.gender === '公' ? '♂' : d.gender === '母' ? '♀' : '?'}
+        </div>
+        <div style="margin-top:4px;font-size:12px;font-weight:600;color:#374151;">${d.gender}</div>
+        <div style="font-size:11px;color:#9ca3af;">${d.count}只 · ${pct}%</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderHealthDistribution(data) {
+  const colors = { '健康': '#22c55e', '需关注': '#f59e0b', '需救助': '#ef4444', '受伤': '#ef4444' };
+  const text = data.map(d => `${d.health_status}: ${d.count}只`).join(' · ');
+  document.getElementById('healthDistText').textContent = text;
+
+  const html = data.map(d => {
+    const color = colors[d.health_status] || '#6b7280';
+    const maxCount = Math.max(...data.map(x => x.count));
+    return `
+      <div style="margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+          <span>${d.health_status}</span>
+          <span style="font-weight:700;">${d.count}只</span>
+        </div>
+        <div style="height:8px;background:#f3f4f6;border-radius:4px;overflow:hidden;">
+          <div style="height:100%;width:${Math.max(d.count / maxCount * 100, 10)}%;background:${color};border-radius:4px;"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('healthChart').innerHTML = html;
+}
+
+function renderTrend(data) {
+  // 销毁旧图表实例，防止重叠
+  if (trendChartInstance) {
+    trendChartInstance.destroy();
+    trendChartInstance = null;
+  }
+
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  // 补全近7天所有日期（后端只返回有数据的日期）
+  const reportMap = {};
+  data.forEach(d => {
+    const dt = new Date(d.date);
+    const key = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+    reportMap[key] = d.count;
+  });
+  const labels = [];
+  const counts = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    labels.push(`${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+    counts.push(reportMap[key] || 0);
+  }
+
+  trendChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels.length ? labels : ['暂无数据'],
+      datasets: [{
+        label: '打卡数',
+        data: labels.length ? counts : [0],
+        borderColor: '#f97316',
+        backgroundColor: 'rgba(249,115,22,0.1)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#f97316',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      animation: { duration: 300 },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+      }
+    }
+  });
+}
+
+function renderTopCats(cats) {
+  const list = document.getElementById('topCatsList');
+  if (cats.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:12px;color:#9ca3af;">暂无数据</div>';
+    return;
+  }
+  list.innerHTML = cats.map((c, i) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f3f4f6;">
+      <span style="font-size:18px;font-weight:800;color:${i < 3 ? ['#fbbf24','#9ca3af','#d97706'][i] : '#d1d5db'};width:24px;">${i + 1}</span>
+      <img src="${c.photo_url || ''}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;background:#f3f4f6;" onerror="this.style.display='none'">
+      <span style="flex:1;font-weight:600;font-size:14px;">${c.cat_name}</span>
+      <span style="font-size:12px;color:#9ca3af;">${c.report_count}次打卡</span>
+    </div>
+  `).join('');
+}
+
+function renderTopUsers(users) {
+  const list = document.getElementById('topUsersList');
+  if (users.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:12px;color:#9ca3af;">暂无数据</div>';
+    return;
+  }
+  list.innerHTML = users.map((u, i) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f3f4f6;">
+      <span style="font-size:18px;font-weight:800;color:${i < 3 ? ['#fbbf24','#9ca3af','#d97706'][i] : '#d1d5db'};width:24px;">${i + 1}</span>
+      <div style="width:36px;height:36px;border-radius:50%;background:#f97316;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px;">${(u.nickname || '匿')[0]}</div>
+      <span style="flex:1;font-weight:600;font-size:14px;">${u.nickname || '匿名'}</span>
+      <span style="font-size:12px;color:#9ca3af;">打卡${u.report_count || 0} · 投喂${u.feed_count || 0}</span>
+    </div>
+  `).join('');
+}
+
+function renderTopFeeds(feeds) {
+  const list = document.getElementById('topFeedsList');
+  if (feeds.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:12px;color:#9ca3af;">暂无投喂数据</div>';
+    return;
+  }
+  list.innerHTML = feeds.map((f, i) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f3f4f6;">
+      <span style="font-size:14px;">🍽️</span>
+      <span style="flex:1;font-weight:600;font-size:14px;">${f.cat_name}</span>
+      <span style="font-size:12px;color:#9ca3af;">${f.location} · </span>
+      <span style="font-size:12px;color:#f97316;font-weight:600;">${f.feed_count}次投喂</span>
+    </div>
+  `).join('');
+}
+
+loadDashboard();
+</script>
+</body>
+</html>

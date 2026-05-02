@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>喵迹 - 登录</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#fff7ed,#f97316);">
+  <div style="background:white;border-radius:24px;padding:40px 32px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.1);">
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-size:48px;margin-bottom:8px;">🐱</div>
+      <h1 style="font-size:24px;font-weight:800;color:#1f2937;">喵迹</h1>
+      <p style="color:#6b7280;font-size:14px;margin-top:4px;">河海大学校园流浪猫地图</p>
+    </div>
+
+    <div id="loginForm">
+      <div style="margin-bottom:16px;">
+        <label class="form-label">用户名</label>
+        <input id="loginUsername" class="form-input" type="text" placeholder="请输入用户名">
+      </div>
+      <div style="margin-bottom:24px;">
+        <label class="form-label">密码</label>
+        <input id="loginPassword" class="form-input" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <button class="btn btn-primary" style="width:100%;padding:14px;" onclick="doLogin()">登 录</button>
+      <p style="text-align:center;margin-top:16px;font-size:13px;color:#6b7280;">
+        还没有账号？<a href="#" onclick="showRegister()" style="color:#f97316;font-weight:600;">立即注册</a>
+      </p>
+      <p style="text-align:center;margin-top:8px;font-size:12px;color:#9ca3af;">
+        测试账号: admin / admin123
+      </p>
+    </div>
+
+    <div id="registerForm" style="display:none;">
+      <div style="margin-bottom:12px;">
+        <label class="form-label">用户名</label>
+        <input id="regUsername" class="form-input" type="text" placeholder="请设置用户名">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="form-label">昵称</label>
+        <input id="regNickname" class="form-input" type="text" placeholder="请输入昵称">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="form-label">手机号</label>
+        <input id="regPhone" class="form-input" type="text" placeholder="请输入手机号(选填)">
+      </div>
+      <div style="margin-bottom:24px;">
+        <label class="form-label">密码</label>
+        <input id="regPassword" class="form-input" type="password" placeholder="请设置密码">
+      </div>
+      <button class="btn btn-primary" style="width:100%;padding:14px;" onclick="doRegister()">注 册</button>
+      <p style="text-align:center;margin-top:16px;font-size:13px;color:#6b7280;">
+        已有账号？<a href="#" onclick="showLogin()" style="color:#f97316;font-weight:600;">去登录</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+function showRegister() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('registerForm').style.display = 'block';
+}
+function showLogin() {
+  document.getElementById('loginForm').style.display = 'block';
+  document.getElementById('registerForm').style.display = 'none';
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+async function doLogin() {
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!username || !password) return showToast('请填写完整信息', 'error');
+
+  const res = await Auth.login(username, password);
+  if (res.code === 200) {
+    showToast('登录成功！');
+    setTimeout(() => { window.location.href = 'index.html'; }, 500);
+  } else {
+    showToast(res.msg || '登录失败', 'error');
+  }
+}
+
+async function doRegister() {
+  const username = document.getElementById('regUsername').value.trim();
+  const nickname = document.getElementById('regNickname').value.trim() || username;
+  const phone = document.getElementById('regPhone').value.trim();
+  const password = document.getElementById('regPassword').value;
+  if (!username || !password) return showToast('请填写完整信息', 'error');
+
+  const res = await Auth.register({ username, password, nickname, phone });
+  if (res.code === 200) {
+    showToast('注册成功，请登录！');
+    showLogin();
+  } else {
+    showToast(res.msg || '注册失败', 'error');
+  }
+}
+</script>
+</body>
+</html>

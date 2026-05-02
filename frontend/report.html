@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>喵迹 - 打卡上报</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="top-bar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <a href="index.html" style="color:white;text-decoration:none;display:flex;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+    </a>
+    <h1>打卡上报</h1>
+    <p>记录猫咪现状，守护校园精灵</p>
+  </div>
+</div>
+
+<div class="page-container" style="padding-top:20px;padding-bottom:100px;">
+  <!-- 紧急上报 -->
+  <a href="report.html?emergency=1" style="display:flex;align-items:center;gap:12px;background:#fef2f2;border-radius:16px;padding:16px;margin-bottom:20px;border:1px solid #fecaca;text-decoration:none;">
+    <div style="width:40px;height:40px;background:#ef4444;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏥</div>
+    <div style="flex:1;">
+      <div style="font-weight:700;color:#b91c1c;font-size:14px;">医疗紧急救助</div>
+      <div style="font-size:11px;color:#ef4444;margin-top:2px;">发现受伤、生病猫咪请点此</div>
+    </div>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+  </a>
+
+  <form id="reportForm" style="display:flex;flex-direction:column;gap:20px;">
+    <!-- 选择猫咪 -->
+    <div>
+      <label class="form-label">1. 你见到了哪只小猫？</label>
+      <select id="catSelect" class="form-input">
+        <option value="">请选择猫咪</option>
+      </select>
+    </div>
+
+    <!-- 上传照片 -->
+    <div>
+      <label class="form-label">2. 上传猫咪照片</label>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        <div id="photoUpload" style="aspect-ratio:1;background:#f9fafb;border:2px dashed #d1d5db;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#9ca3af;cursor:pointer;" onclick="document.getElementById('fileInput').click()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span style="font-size:9px;margin-top:4px;">添加照片</span>
+        </div>
+        <div id="photoPreview" style="display:none;aspect-ratio:1;border-radius:12px;overflow:hidden;">
+          <img id="previewImg" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+      </div>
+      <input id="fileInput" type="file" accept="image/*" style="display:none" onchange="previewPhoto(this)">
+    </div>
+
+    <!-- 健康状态 -->
+    <div>
+      <label class="form-label">3. 猫咪看起来怎么样？</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button type="button" class="btn btn-sm health-btn active" data-value="健康" style="background:#f97316;color:white;border:none;" onclick="selectHealth(this)">😊 非常精神</button>
+        <button type="button" class="btn btn-sm health-btn" data-value="一般" style="background:white;color:#6b7280;border:1px solid #d1d5db;" onclick="selectHealth(this)">😐 一般</button>
+        <button type="button" class="btn btn-sm health-btn" data-value="需关注" style="background:white;color:#6b7280;border:1px solid #d1d5db;" onclick="selectHealth(this)">😔 有点萎靡</button>
+        <button type="button" class="btn btn-sm health-btn" data-value="需救助" style="background:white;color:#6b7280;border:1px solid #d1d5db;" onclick="selectHealth(this)">🚨 需要救助</button>
+      </div>
+    </div>
+
+    <!-- 打卡类型 -->
+    <div>
+      <label class="form-label">4. 打卡类型</label>
+      <div style="display:flex;gap:8px;">
+        <button type="button" class="btn btn-sm type-btn active" data-value="偶遇" style="background:#f97316;color:white;border:none;" onclick="selectType(this)">👋 偶遇</button>
+        <button type="button" class="btn btn-sm type-btn" data-value="投喂" style="background:white;color:#6b7280;border:1px solid #d1d5db;" onclick="selectType(this)">🍽️ 投喂</button>
+      </div>
+    </div>
+
+    <!-- 位置 -->
+    <div>
+      <label class="form-label">5. 出现位置</label>
+      <div style="display:flex;gap:8px;">
+        <input id="locationInput" class="form-input" placeholder="输入位置描述或点击定位" style="flex:1;">
+        <button type="button" class="btn btn-sm btn-outline" onclick="getLocation()">📍</button>
+      </div>
+      <div id="locationStatus" style="font-size:11px;color:#9ca3af;margin-top:4px;"></div>
+    </div>
+
+    <!-- 备注 -->
+    <div>
+      <label class="form-label">6. 补充备注</label>
+      <textarea id="descInput" class="form-input" rows="3" placeholder="它今天心情如何？有没有吃东西？"></textarea>
+    </div>
+
+    <button type="button" class="btn btn-primary" style="width:100%;padding:16px;font-size:16px;" onclick="submitReport()">
+      📝 提交巡护打卡
+    </button>
+  </form>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+    <span>地图</span>
+  </a>
+  <a href="wiki.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+    <span>图鉴</span>
+  </a>
+  <a href="report.html" class="active">
+    <div class="report-btn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <span style="margin-top:2px;">打卡</span>
+  </a>
+  <a href="dashboard.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    <span>看板</span>
+  </a>
+  <a href="profile.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    <span>我的</span>
+  </a>
+</nav>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+let selectedHealth = '健康';
+let selectedType = '偶遇';
+let userLat = null, userLng = null;
+let photoFile = null;
+
+// 加载猫咪列表
+async function loadCats() {
+  const res = await API.get('/cats');
+  if (res.code !== 200) return;
+  const select = document.getElementById('catSelect');
+  res.data.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat.id;
+    opt.textContent = `${cat.cat_name} (${cat.color} · ${cat.location})`;
+    select.appendChild(opt);
+  });
+}
+loadCats();
+
+function selectHealth(btn) {
+  document.querySelectorAll('.health-btn').forEach(b => {
+    b.style.background = 'white';
+    b.style.color = '#6b7280';
+    b.style.border = '1px solid #d1d5db';
+  });
+  btn.style.background = '#f97316';
+  btn.style.color = 'white';
+  btn.style.border = 'none';
+  selectedHealth = btn.dataset.value;
+}
+
+function selectType(btn) {
+  document.querySelectorAll('.type-btn').forEach(b => {
+    b.style.background = 'white';
+    b.style.color = '#6b7280';
+    b.style.border = '1px solid #d1d5db';
+  });
+  btn.style.background = '#f97316';
+  btn.style.color = 'white';
+  btn.style.border = 'none';
+  selectedType = btn.dataset.value;
+}
+
+function previewPhoto(input) {
+  if (input.files && input.files[0]) {
+    photoFile = input.files[0];
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('photoUpload').style.display = 'none';
+      document.getElementById('photoPreview').style.display = 'block';
+      document.getElementById('previewImg').src = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function getLocation() {
+  if (!navigator.geolocation) {
+    document.getElementById('locationStatus').textContent = '⚠️ 浏览器不支持定位';
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userLat = pos.coords.latitude;
+      userLng = pos.coords.longitude;
+      document.getElementById('locationInput').value = `已获取位置 (${userLat.toFixed(4)}, ${userLng.toFixed(4)})`;
+      document.getElementById('locationStatus').textContent = '✅ 定位成功';
+    },
+    () => {
+      document.getElementById('locationStatus').textContent = '⚠️ 定位失败，请手动输入位置';
+    }
+  );
+}
+
+async function submitReport() {
+  if (!Auth.isLoggedIn()) return window.location.href = 'login.html';
+
+  const catId = document.getElementById('catSelect').value;
+  const location = document.getElementById('locationInput').value.trim();
+  const description = document.getElementById('descInput').value.trim();
+
+  if (!catId) return showToast('请选择猫咪', 'error');
+
+  const formData = new FormData();
+  formData.append('cat_id', catId);
+  formData.append('report_type', selectedType);
+  formData.append('health_status', selectedHealth);
+  formData.append('description', description || `${selectedType}打卡`);
+  formData.append('location', location || '未知位置');
+  if (userLat) formData.append('latitude', userLat);
+  if (userLng) formData.append('longitude', userLng);
+  if (photoFile) formData.append('photo', photoFile);
+
+  const res = await API.upload('/reports', formData);
+  if (res.code === 200) {
+    showToast('✅ 打卡提交成功！等待管理员审核');
+
+    // 1.5秒后显示科普弹窗 + 查看地图按钮
+    setTimeout(() => showScienceTipWithMap(), 500);
+  } else {
+    showToast(res.msg || '提交失败', 'error');
+  }
+}
+
+// 科普引导
+const scienceTips = [
+  { title: '🥩 投喂禁忌', content: '请不要投喂火腿肠、含盐分的人类食物、巧克力等，这些对猫咪健康有害！推荐投喂猫粮、冻干、清水。' },
+  { title: '🐱 猫咪常识', content: '流浪猫的平均寿命约3-5年，远低于家猫的12-15年。你的每次打卡和投喂，都在帮助它们活得更久更好。' },
+  { title: '🏥 救助须知', content: '发现受伤猫咪不要贸然抓捕，可联系校园志愿者小组或拍照上报管理员。如需紧急救助请拨打合作宠物医院电话。' },
+  { title: '🌿 人猫和谐', content: '与流浪猫互动时请温和轻缓，不要强行抱猫或惊吓它。尊重猫咪的边界，才能长久和谐共处。' },
+  { title: '📅 绝育重要', content: 'TNR（诱捕-绝育-放归）是控制流浪猫数量的最人道方式。已绝育的猫咪耳朵上会有剪耳标记。' }
+];
+
+let scienceIndex = 0;
+
+function showScienceTipWithMap() {
+  const tip = scienceTips[scienceIndex % scienceTips.length];
+  scienceIndex++;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay show';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div class="overlay-content">
+      <div style="text-align:center;margin-bottom:12px;">
+        <div style="width:48px;height:48px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <h3 style="font-size:18px;font-weight:700;">打卡提交成功！</h3>
+        <p style="font-size:13px;color:#6b7280;">等待管理员审核通过后，即可在地图上查看</p>
+      </div>
+      <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:16px;">
+        <h4 style="font-size:14px;font-weight:700;margin-bottom:8px;">${tip.title}</h4>
+        <p style="font-size:13px;color:#4b5563;line-height:1.6;">${tip.content}</p>
+      </div>
+      <a href="index.html" class="btn btn-primary" style="display:block;width:100%;padding:14px;text-align:center;text-decoration:none;box-sizing:border-box;">
+        🗺️ 前往地图查看
+      </a>
+      <button onclick="this.closest('.overlay').remove()" class="btn btn-secondary" style="width:100%;margin-top:8px;">
+        继续打卡
+      </button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+</script>
+</body>
+</html>

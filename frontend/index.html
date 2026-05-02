@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>喵迹 - 校园猫咪地图</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="css/style.css">
+<style>
+  #map { height: calc(100vh - 56px); width: 100%; border-radius: 0; }
+  .map-header { position: absolute; top: 12px; left: 12px; right: 12px; z-index: 1000; }
+  .map-header .search-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); }
+  .map-btn { position: absolute; z-index: 1000; width: 44px; height: 44px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); cursor: pointer; border: none; font-size: 18px; }
+  .map-btn:hover { background: #f3f4f6; }
+  .map-btn.active { background: #f97316; color: white; }
+  .bottom-card { position: absolute; bottom: 70px; left: 12px; right: 12px; z-index: 1000; background: white; border-radius: 16px; padding: 16px; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); display: none; cursor: pointer; }
+  .bottom-card.show { display: block; }
+  body { overflow: hidden; }
+  .basemap-btn { position: absolute; right: 12px; bottom: 70px; z-index: 1000; }
+  .heat-btn { position: absolute; right: 12px; bottom: 125px; z-index: 1000; }
+  .report-layer-btn { position: absolute; right: 12px; bottom: 180px; z-index: 1000; }
+  .locate-btn { position: absolute; right: 12px; bottom: 235px; z-index: 1000; }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- 搜索栏 -->
+<div class="map-header">
+  <div class="search-box">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="searchInput" class="flex-1 outline-none text-sm bg-transparent" placeholder="搜索猫咪姓名或位置..." oninput="filterCats(this.value)">
+  </div>
+</div>
+
+<!-- 右侧按钮组 -->
+<button class="map-btn locate-btn" onclick="locateMe()" title="我的位置">📍</button>
+<button class="map-btn report-layer-btn" id="reportLayerBtn" onclick="toggleReportLayer()" title="打卡记录">📋</button>
+<button class="map-btn heat-btn" id="heatBtn" onclick="toggleHeatmap()" title="热力图">🔥</button>
+<button class="map-btn basemap-btn" id="basemapBtn" onclick="toggleBasemap()" title="切换底图">🗺️</button>
+
+<!-- 底部信息卡 -->
+<div class="bottom-card" id="bottomCard">
+  <div style="display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="showDetail()">
+    <img id="cardImg" src="" alt="" style="width:60px;height:60px;border-radius:12px;object-fit:cover;background:#f3f4f6;">
+    <div style="flex:1;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <h3 id="cardName" style="font-weight:700;font-size:16px;"></h3>
+        <span id="cardStatus" class="tag" style="font-size:10px;"></span>
+      </div>
+      <p id="cardLocation" style="font-size:12px;color:#6b7280;margin-top:2px;"></p>
+      <p id="cardInfo" style="font-size:11px;color:#9ca3af;margin-top:4px;"></p>
+    </div>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+  </div>
+  <div id="cardAdmin" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid #f3f4f6;">
+    <button class="btn btn-sm" id="dragBtn" style="width:100%;background:#f3f4f6;border:none;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;" onclick="toggleDrag()">✋ 拖动调整位置</button>
+    <div id="dragSaveBar" style="display:none;gap:8px;margin-top:8px;">
+      <button class="btn btn-sm" style="flex:1;background:#16a34a;color:white;border:none;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;" onclick="savePosition()">✅ 保存位置</button>
+      <button class="btn btn-sm" style="flex:1;background:#6b7280;color:white;border:none;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;" onclick="cancelDrag()">↩️ 取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 底部导航 -->
+<nav class="bottom-nav">
+  <a href="index.html" class="active">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+    <span>地图</span>
+  </a>
+  <a href="wiki.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+    <span>图鉴</span>
+  </a>
+  <a href="report.html">
+    <div class="report-btn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <span style="margin-top:2px;">打卡</span>
+  </a>
+  <a href="dashboard.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    <span>看板</span>
+  </a>
+  <a href="profile.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    <span>我的</span>
+  </a>
+</nav>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/map.js"></script>
+<script>
+let map, markers = {}, heatLayer = null, allCats = [];
+let activeCatId = null;
+let currentBasemap = 'osm';
+let osmLayer, satelliteLayer;
+let reportMarkers = [], reportLayerVisible = false;
+
+// 初始化地图 - 固定以河海大学江宁校区为中心
+map = L.map('map', {
+  center: [31.9139, 118.7862],
+  zoom: 16,
+  zoomControl: false,
+  zoomSnap: 0.5,
+  zoomDelta: 0.5,
+  wheelPxPerZoomLevel: 60,
+  minZoom: 13,
+  maxZoom: 18,
+});
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// OSM底图（默认）
+osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '&copy; OpenStreetMap'
+}).addTo(map);
+
+// 卫星底图
+satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 19,
+  attribution: '&copy; Esri'
+});
+
+
+// 加载猫咪点位
+async function loadCats() {
+  const res = await API.get('/cats');
+  if (res.code !== 200) return;
+  allCats = res.data;
+  renderMarkers(allCats);
+}
+loadCats();
+
+function renderMarkers(cats) {
+  Object.values(markers).forEach(m => map.removeLayer(m));
+  markers = {};
+
+  cats.forEach(cat => {
+    if (!cat.longitude || !cat.latitude) return;
+    const pos = [cat.latitude, cat.longitude];
+    const color = getCatMarkerColor(cat.health_status);
+    const isEmergency = cat.health_status === '需救助' || cat.health_status === '受伤';
+    const icon = L.divIcon({
+      html: `<div style="width:34px;height:34px;background:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);${isEmergency?'animation:pulse 1.5s infinite;':''}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2l3 5h-2v2h-2v-2h-2zm-2 13h4v3h-4zm-5-5h3v2h-3zm11 0h3v2h-3z"/></svg>
+      </div>`,
+      className: 'custom-marker',
+      iconSize: [40, 40],
+      iconAnchor: [20, 20]
+    });
+
+    const marker = L.marker(pos, { icon }).addTo(map);
+    marker._catData = cat;
+    marker.on('click', () => showBottomCard(cat));
+    marker.on('dragend', () => onDragEnd(marker));
+    markers[cat.id] = marker;
+  });
+}
+
+function showBottomCard(cat) {
+  activeCatId = cat.id;
+  document.getElementById('cardImg').src = cat.photo_url || '';
+  document.getElementById('cardName').textContent = cat.cat_name;
+  document.getElementById('cardStatus').textContent = cat.health_status;
+  document.getElementById('cardStatus').className = `tag tag-${cat.health_status === '健康' ? 'green' : cat.health_status === '需关注' ? 'orange' : 'red'}`;
+  document.getElementById('cardLocation').textContent = `📍 ${cat.location}`;
+  document.getElementById('cardInfo').textContent = `${cat.gender} · ${cat.color} · ${cat.age || '未知年龄'}`;
+  document.getElementById('bottomCard').classList.add('show');
+  // 管理员显示拖动调整按钮
+  const adminSection = document.getElementById('cardAdmin');
+  if (Auth.isAdmin()) {
+    adminSection.style.display = 'block';
+  } else {
+    adminSection.style.display = 'none';
+  }
+  // 重置拖动状态
+  document.getElementById('dragBtn').style.display = 'block';
+  document.getElementById('dragSaveBar').style.display = 'none';
+  // 如果之前有标记在拖动状态，取消它
+  if (window._draggingMarker) {
+    window._draggingMarker.dragging.disable();
+    window._draggingMarker = null;
+  }
+}
+
+function showDetail() {
+  if (activeCatId) window.location.href = `detail.html?id=${activeCatId}`;
+}
+
+// ===== 管理员拖拽调整位置 =====
+let _dragCatId = null;
+
+function toggleDrag() {
+  const marker = markers[activeCatId];
+  if (!marker) return;
+
+  if (_dragCatId === activeCatId) return; // 已经在拖动
+
+  _dragCatId = activeCatId;
+  marker.dragging.enable();
+  marker.openPopup();
+  window._draggingMarker = marker;
+
+  document.getElementById('dragBtn').style.display = 'none';
+  document.getElementById('dragSaveBar').style.display = 'flex';
+}
+
+function onDragEnd(marker) {
+  if (!marker._catData) return;
+  const pos = marker.getLatLng();
+  marker.bindPopup(`
+    <div style="text-align:center;font-size:12px;">
+      <div style="font-weight:bold;margin-bottom:4px;">${marker._catData.cat_name}</div>
+      <div style="color:#666;">新位置: ${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}</div>
+      <div style="color:#999;font-size:11px;">点击下方"保存位置"确认</div>
+    </div>
+  `).openPopup();
+}
+
+async function savePosition() {
+  const marker = markers[_dragCatId];
+  if (!marker) return cancelDrag();
+
+  const pos = marker.getLatLng();
+  const res = await API.put('/cats/' + _dragCatId, {
+    latitude: pos.lat.toFixed(8),
+    longitude: pos.lng.toFixed(8)
+  });
+
+  if (res.code === 200) {
+    showToast('✅ 位置已更新');
+    // 更新本地数据
+    const cat = allCats.find(c => c.id === _dragCatId);
+    if (cat) {
+      cat.latitude = pos.lat.toFixed(8);
+      cat.longitude = pos.lng.toFixed(8);
+    }
+    marker.dragging.disable();
+    marker._catData.latitude = pos.lat.toFixed(8);
+    marker._catData.longitude = pos.lng.toFixed(8);
+    marker.closePopup();
+    window._draggingMarker = null;
+    _dragCatId = null;
+    document.getElementById('dragBtn').style.display = 'block';
+    document.getElementById('dragSaveBar').style.display = 'none';
+  } else {
+    showToast('保存失败: ' + (res.msg || '未知错误'), 'error');
+  }
+}
+
+function cancelDrag() {
+  const marker = markers[_dragCatId];
+  if (marker) {
+    marker.dragging.disable();
+    marker.closePopup();
+    // 恢复原始位置
+    const cat = allCats.find(c => c.id === _dragCatId);
+    if (cat) {
+      marker.setLatLng([cat.latitude, cat.longitude]);
+    }
+  }
+  window._draggingMarker = null;
+  _dragCatId = null;
+  document.getElementById('dragBtn').style.display = 'block';
+  document.getElementById('dragSaveBar').style.display = 'none';
+}
+
+function showToast(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'toast toast-' + (type || 'success');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+function filterCats(keyword) {
+  const kw = keyword.trim().toLowerCase();
+  if (!kw) { renderMarkers(allCats); return; }
+  const filtered = allCats.filter(c => c.cat_name.includes(kw) || c.location.includes(kw) || c.color.includes(kw));
+  renderMarkers(filtered);
+}
+
+// 底图切换（OSM ↔ 卫星）
+function toggleBasemap() {
+  const btn = document.getElementById('basemapBtn');
+  if (currentBasemap === 'osm') {
+    map.removeLayer(osmLayer);
+    satelliteLayer.addTo(map);
+    currentBasemap = 'satellite';
+    btn.textContent = '🗺️';
+    btn.title = '切换为街道图';
+  } else {
+    map.removeLayer(satelliteLayer);
+    osmLayer.addTo(map);
+    currentBasemap = 'osm';
+    btn.textContent = '🛰️';
+    btn.title = '切换为卫星图';
+  }
+}
+
+// 热力图切换
+async function toggleHeatmap() {
+  if (heatLayer) {
+    map.removeLayer(heatLayer);
+    heatLayer = null;
+    document.getElementById('heatBtn').classList.remove('active');
+    return;
+  }
+
+  const res = await API.get('/reports/map');
+  if (res.code !== 200 || !res.data.length) {
+    alert('暂无足够的打卡数据生成热力图');
+    return;
+  }
+
+  const points = res.data
+    .map(r => [parseFloat(r.latitude), parseFloat(r.longitude), 0.5]);
+
+  if (points.length === 0) return alert('暂无位置数据');
+
+  heatLayer = L.heatLayer(points, {
+    radius: 30, blur: 20, maxZoom: 17,
+    gradient: { 0.4: '#22c55e', 0.6: '#f59e0b', 0.8: '#ef4444' }
+  }).addTo(map);
+  document.getElementById('heatBtn').classList.add('active');
+}
+
+// 定位
+function locateMe() {
+  if (!navigator.geolocation) return alert('浏览器不支持定位');
+  navigator.geolocation.getCurrentPosition(pos => {
+    map.setView([pos.coords.latitude, pos.coords.longitude], 17);
+    L.circleMarker([pos.coords.latitude, pos.coords.longitude], {
+      radius: 8, color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.4
+    }).addTo(map).bindPopup('📍 你的位置').openPopup();
+  }, () => alert('定位失败，请检查定位权限'));
+}
+
+// 打卡记录图层切换
+async function toggleReportLayer() {
+  const btn = document.getElementById('reportLayerBtn');
+  if (reportLayerVisible) {
+    reportMarkers.forEach(m => map.removeLayer(m));
+    reportMarkers = [];
+    reportLayerVisible = false;
+    btn.classList.remove('active');
+    return;
+  }
+  btn.classList.add('active');
+  reportMarkers = await loadReportMarkers(map);
+  reportLayerVisible = true;
+  if (reportMarkers.length === 0) {
+    btn.classList.remove('active');
+    alert('暂无已通过的打卡记录');
+  }
+}
+</script>
+</body>
+</html>

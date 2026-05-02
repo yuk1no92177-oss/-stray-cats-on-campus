@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>喵迹 - 管理后台</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="top-bar" style="background:linear-gradient(135deg,#1f2937,#374151);">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <a href="profile.html" style="color:white;text-decoration:none;display:flex;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+    </a>
+    <h1>🛡️ 管理后台</h1>
+  </div>
+</div>
+
+<div class="page-container" style="padding-top:20px;padding-bottom:80px;">
+  <!-- 标签页 -->
+  <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid #e5e7eb;padding-bottom:8px;">
+    <button class="btn btn-sm tab-btn active" data-tab="pending" onclick="switchTab(this, 'pending')" style="background:#f97316;color:white;border:none;">待审核</button>
+    <button class="btn btn-sm tab-btn" data-tab="cats" onclick="switchTab(this, 'cats')" style="background:white;color:#6b7280;border:1px solid #d1d5db;">猫咪管理</button>
+    <button class="btn btn-sm tab-btn" data-tab="users" onclick="switchTab(this, 'users')" style="background:white;color:#6b7280;border:1px solid #d1d5db;">用户管理</button>
+  </div>
+
+  <!-- 待审核内容 -->
+  <div id="tab-pending" class="tab-content">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">待审核打卡记录</h3>
+    <div id="pendingList"><div class="loading"></div></div>
+  </div>
+
+  <!-- 猫咪管理 -->
+  <div id="tab-cats" class="tab-content" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="font-size:14px;font-weight:700;">猫咪列表</h3>
+      <button class="btn btn-sm btn-primary" onclick="showAddCat()">+ 新增猫咪</button>
+    </div>
+    <div id="catManageList"><div class="loading"></div></div>
+  </div>
+
+  <!-- 用户管理 -->
+  <div id="tab-users" class="tab-content" style="display:none;">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">用户列表</h3>
+    <div id="userList"><div class="loading"></div></div>
+  </div>
+</div>
+
+<!-- 新增猫咪弹窗 -->
+<div class="overlay" id="addCatOverlay">
+  <div class="overlay-content">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;">新增猫咪</h3>
+    <form id="addCatForm" style="display:flex;flex-direction:column;gap:12px;">
+      <input class="form-input" name="cat_name" placeholder="猫咪名字" required>
+      <input class="form-input" name="color" placeholder="毛色">
+      <select class="form-input" name="gender">
+        <option value="公">公</option>
+        <option value="母">母</option>
+        <option value="未知">未知</option>
+      </select>
+      <input class="form-input" name="age" placeholder="年龄">
+      <input class="form-input" name="health_status" placeholder="健康状态 (健康/需关注/需救助/受伤)">
+      <input class="form-input" name="location" placeholder="常出没位置">
+      <input class="form-input" name="longitude" placeholder="经度 (如 118.781)">
+      <input class="form-input" name="latitude" placeholder="纬度 (如 31.914)">
+      <input type="hidden" name="area" value="">
+      <textarea class="form-input" name="character_desc" placeholder="性格描述"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button type="button" class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('addCatOverlay').classList.remove('show')">取消</button>
+        <button type="button" class="btn btn-primary" style="flex:1;" onclick="submitAddCat()">确认添加</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 编辑猫咪弹窗 -->
+<div class="overlay" id="editCatOverlay">
+  <div class="overlay-content">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;">编辑猫咪</h3>
+    <form id="editCatForm" style="display:flex;flex-direction:column;gap:12px;">
+      <input type="hidden" name="id">
+      <input class="form-input" name="cat_name" placeholder="猫咪名字" required>
+      <input class="form-input" name="color" placeholder="毛色">
+      <select class="form-input" name="gender">
+        <option value="公">公</option>
+        <option value="母">母</option>
+        <option value="未知">未知</option>
+      </select>
+      <input class="form-input" name="age" placeholder="年龄">
+      <input class="form-input" name="health_status" placeholder="健康状态 (健康/需关注/需救助/受伤)">
+      <input class="form-input" name="location" placeholder="常出没位置">
+      <input class="form-input" name="longitude" placeholder="经度 (如 118.781)">
+      <input class="form-input" name="latitude" placeholder="纬度 (如 31.914)">
+      <textarea class="form-input" name="character_desc" placeholder="性格描述"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button type="button" class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('editCatOverlay').classList.remove('show')">取消</button>
+        <button type="button" class="btn btn-primary" style="flex:1;" onclick="submitEditCat()">保存修改</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+    <span>地图</span>
+  </a>
+  <a href="wiki.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+    <span>图鉴</span>
+  </a>
+  <a href="report.html">
+    <div class="report-btn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <span style="margin-top:2px;">打卡</span>
+  </a>
+  <a href="dashboard.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    <span>看板</span>
+  </a>
+  <a href="profile.html">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    <span>我的</span>
+  </a>
+</nav>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+// 权限检查
+if (!Auth.isLoggedIn() || !Auth.isAdmin()) {
+  window.location.href = 'index.html';
+}
+
+function switchTab(btn, tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.style.background = 'white';
+    b.style.color = '#6b7280';
+    b.style.border = '1px solid #d1d5db';
+  });
+  btn.style.background = '#f97316';
+  btn.style.color = 'white';
+  btn.style.border = 'none';
+
+  document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+  document.getElementById(`tab-${tab}`).style.display = 'block';
+
+  if (tab === 'pending') loadPending();
+  if (tab === 'cats') loadCatsForAdmin();
+  if (tab === 'users') loadUsers();
+}
+
+// 加载待审核
+async function loadPending() {
+  const el = document.getElementById('pendingList');
+  const res = await API.get('/reports?status=待审核');
+  if (res.code !== 200) { el.innerHTML = '<div class="empty-state"><p>加载失败</p></div>'; return; }
+
+  if (res.data.length === 0) {
+    el.innerHTML = '<div class="empty-state"><p>🎉 暂无待审核记录</p></div>';
+    return;
+  }
+
+  el.innerHTML = res.data.map(r => `
+    <div style="background:white;border-radius:12px;padding:16px;margin-bottom:8px;border:1px solid #f3f4f6;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-weight:600;font-size:13px;">${r.cat_name || '未知猫咪'}</span>
+        <span style="font-size:11px;color:#9ca3af;">${new Date(r.create_time).toLocaleString('zh-CN')}</span>
+      </div>
+      <p style="font-size:12px;color:#6b7280;">${r.nickname || '匿名'} · ${r.location || '未知位置'}</p>
+      <p style="font-size:12px;color:#4b5563;margin-top:4px;">${r.description || ''}</p>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn btn-sm btn-primary" onclick="review(${r.id}, '已通过')">✅ 通过</button>
+        <button class="btn btn-sm btn-outline" onclick="review(${r.id}, '已驳回')">❌ 驳回</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function review(id, status) {
+  const res = await API.put(`/reports/${id}/status`, { status });
+  if (res.code === 200) {
+    showToast(status === '已通过' ? '✅ 已通过' : '❌ 已驳回');
+    loadPending();
+  } else {
+    showToast('操作失败', 'error');
+  }
+}
+
+// 加载猫咪管理列表
+async function loadCatsForAdmin() {
+  const el = document.getElementById('catManageList');
+  const res = await API.get('/cats');
+  if (res.code !== 200) { el.innerHTML = '<div class="empty-state"><p>加载失败</p></div>'; return; }
+
+  el.innerHTML = res.data.map(c => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;background:white;border-radius:12px;margin-bottom:8px;border:1px solid #f3f4f6;">
+      <img src="${c.photo_url || ''}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;background:#f3f4f6;" onerror="this.style.display='none'">
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:600;font-size:14px;">${c.cat_name}</div>
+        <div style="font-size:11px;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.location || ''}</div>
+      </div>
+      <span class="tag ${c.health_status === '健康' ? 'tag-green' : c.health_status === '需关注' ? 'tag-orange' : 'tag-red'}" style="flex-shrink:0;">${c.health_status || '未知'}</span>
+      <div style="display:flex;gap:4px;flex-shrink:0;">
+        <button class="btn btn-sm" style="background:#f3f4f6;border:none;padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;" onclick="showEditCat(${c.id})">✏️</button>
+        <button class="btn btn-sm" style="background:#fef2f2;border:none;padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;" onclick="deleteCat(${c.id}, '${c.cat_name}')">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 加载用户列表
+async function loadUsers() {
+  const el = document.getElementById('userList');
+  const res = await API.get('/users');
+  if (res.code !== 200) { el.innerHTML = '<div class="empty-state"><p>加载失败</p></div>'; return; }
+
+  el.innerHTML = res.data.map(u => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;background:white;border-radius:12px;margin-bottom:8px;border:1px solid #f3f4f6;">
+      <div style="width:36px;height:36px;border-radius:50%;background:#f97316;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px;">${(u.nickname || u.username)[0]}</div>
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:14px;">${u.nickname || u.username}</div>
+        <div style="font-size:11px;color:#9ca3af;">${u.username} · ${u.role === 'admin' ? '管理员' : '普通用户'}</div>
+      </div>
+      <span class="tag ${u.role === 'admin' ? 'tag-orange' : 'tag-blue'}">${u.role === 'admin' ? '管理员' : '用户'}</span>
+    </div>
+  `).join('');
+}
+
+// 新增猫咪
+function showAddCat() {
+  document.getElementById('addCatOverlay').classList.add('show');
+}
+
+async function submitAddCat() {
+  const form = document.getElementById('addCatForm');
+  const data = {};
+  new FormData(form).forEach((v, k) => data[k] = v);
+
+  const res = await API.post('/cats', data);
+  if (res.code === 200) {
+    showToast('新增成功！');
+    document.getElementById('addCatOverlay').classList.remove('show');
+    loadCatsForAdmin();
+  } else {
+    showToast(res.msg || '新增失败', 'error');
+  }
+}
+
+// 编辑猫咪
+async function showEditCat(id) {
+  const res = await API.get('/cats/' + id);
+  if (res.code !== 200) { showToast('获取猫咪信息失败', 'error'); return; }
+
+  const cat = res.data;
+  const form = document.getElementById('editCatForm');
+  form.querySelector('[name="id"]').value = cat.id;
+  form.querySelector('[name="cat_name"]').value = cat.cat_name || '';
+  form.querySelector('[name="color"]').value = cat.color || '';
+  form.querySelector('[name="gender"]').value = cat.gender || '未知';
+  form.querySelector('[name="age"]').value = cat.age || '';
+  form.querySelector('[name="health_status"]').value = cat.health_status || '健康';
+  form.querySelector('[name="location"]').value = cat.location || '';
+  form.querySelector('[name="longitude"]').value = cat.longitude || '';
+  form.querySelector('[name="latitude"]').value = cat.latitude || '';
+  form.querySelector('[name="character_desc"]').value = cat.character_desc || '';
+
+  document.getElementById('editCatOverlay').classList.add('show');
+}
+
+async function submitEditCat() {
+  const form = document.getElementById('editCatForm');
+  const id = form.querySelector('[name="id"]').value;
+  const data = {};
+  new FormData(form).forEach((v, k) => { if (k !== 'id') data[k] = v; });
+
+  const res = await API.put('/cats/' + id, data);
+  if (res.code === 200) {
+    showToast('✅ 修改成功');
+    document.getElementById('editCatOverlay').classList.remove('show');
+    loadCatsForAdmin();
+  } else {
+    showToast(res.msg || '修改失败', 'error');
+  }
+}
+
+// 删除猫咪
+async function deleteCat(id, name) {
+  if (!confirm(`确定要删除猫咪"${name}"吗？此操作不可恢复。`)) return;
+
+  const res = await API.delete('/cats/' + id);
+  if (res.code === 200) {
+    showToast('✅ 已删除');
+    loadCatsForAdmin();
+  } else {
+    showToast(res.msg || '删除失败', 'error');
+  }
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// 默认加载待审核
+loadPending();
+</script>
+</body>
+</html>

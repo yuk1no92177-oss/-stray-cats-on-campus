@@ -1,0 +1,26 @@
+{
+  "name": "stray-cats-backend",
+  "version": "1.0.0",
+  "description": "校园流浪猫地图系统后端",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js"
+  },
+  "keywords": [
+    "webgis",
+    "cats",
+    "campus"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "mysql2": "^3.22.3"
+  }
+}
