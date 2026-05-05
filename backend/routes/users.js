@@ -43,6 +43,12 @@ router.post('/login', async (req, res) => {
     }
 
     const user = users[0];
+
+    // 检查是否被封禁
+    if (user.is_banned) {
+      return res.status(403).json({ code: 403, msg: '账号已被封禁，请联系管理员' });
+    }
+
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
       return res.status(401).json({ code: 401, msg: '用户名或密码错误' });
@@ -154,11 +160,29 @@ router.put('/profile', authToken, async (req, res) => {
 router.get('/', authAdmin, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT id, username, nickname, role, create_time FROM users ORDER BY id'
+      'SELECT id, username, nickname, role, is_banned, create_time FROM users ORDER BY id'
     );
     res.json({ code: 200, msg: '获取成功', data: rows });
   } catch (err) {
     res.status(500).json({ code: 500, msg: '服务器错误', error: err.message });
+  }
+});
+
+// PUT /api/users/:id/ban - 管理员封禁/解封用户
+router.put('/:id/ban', authAdmin, async (req, res) => {
+  try {
+    const { is_banned } = req.body;
+    const targetId = req.params.id;
+
+    // 不能封禁自己
+    if (targetId == req.user.id) {
+      return res.status(400).json({ code: 400, msg: '不能封禁自己' });
+    }
+
+    await pool.query('UPDATE users SET is_banned = ? WHERE id = ?', [is_banned ? 1 : 0, targetId]);
+    res.json({ code: 200, msg: is_banned ? '已封禁' : '已解封' });
+  } catch (err) {
+    res.status(500).json({ code: 500, msg: '操作失败', error: err.message });
   }
 });
 

@@ -17,6 +17,13 @@ router.post('/', authToken, async (req, res) => {
       [req.user.id, cat_id, food || null]
     );
 
+    // 检查并解锁勋章
+    const [feedCount] = await pool.query('SELECT COUNT(*) as c FROM feeds WHERE user_id = ?', [req.user.id]);
+    await checkAndAwardBadge(req.user.id, 'feed_count', feedCount[0].c);
+
+    const [catCount] = await pool.query('SELECT COUNT(DISTINCT cat_id) as c FROM feeds WHERE user_id = ?', [req.user.id]);
+    await checkAndAwardBadge(req.user.id, 'cat_unlocked', catCount[0].c);
+
     res.json({ code: 200, msg: '投喂记录成功！', data: { id: result.insertId } });
   } catch (err) {
     res.status(500).json({ code: 500, msg: '记录失败', error: err.message });
@@ -45,5 +52,22 @@ router.get('/', async (req, res) => {
     res.status(500).json({ code: 500, msg: '服务器错误', error: err.message });
   }
 });
+
+async function checkAndAwardBadge(userId, conditionType, value) {
+  try {
+    const [badges] = await pool.query(
+      'SELECT id, condition_value FROM badges WHERE condition_type = ? AND condition_value <= ?',
+      [conditionType, value]
+    );
+    for (const badge of badges) {
+      await pool.query(
+        'INSERT IGNORE INTO user_badges (user_id, badge_id) VALUES (?, ?)',
+        [userId, badge.id]
+      );
+    }
+  } catch (err) {
+    console.error('勋章检查失败:', err.message);
+  }
+}
 
 module.exports = router;

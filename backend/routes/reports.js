@@ -115,6 +115,10 @@ router.put('/:id/status', authAdmin, async (req, res) => {
         // 检查"热心铲屎官"
         const [count] = await pool.query('SELECT COUNT(*) as c FROM reports WHERE user_id = ? AND status = ?', [user_id, '已通过']);
         await checkAndAwardBadge(user_id, 'report_count', count[0].c);
+
+        // 检查"探索先锋"勋章（解锁不同猫咪数）
+        const [distinctCats] = await pool.query('SELECT COUNT(DISTINCT cat_id) as c FROM reports WHERE user_id = ? AND status = ?', [user_id, '已通过']);
+        await checkAndAwardBadge(user_id, 'cat_unlocked', distinctCats[0].c);
       }
     }
 

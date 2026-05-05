@@ -1,7 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 const pool = require('../config/db');
 const { authToken, authAdmin } = require('../middleware/auth');
+
+// 文件上传配置
+const storage = multer.diskStorage({
+  destination: path.join(__dirname, '../uploads'),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 // GET /api/cats - 获取所有猫咪
 router.get('/', async (req, res) => {
@@ -62,9 +74,10 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/cats - 管理员新增猫咪
-router.post('/', authAdmin, async (req, res) => {
+router.post('/', authAdmin, upload.single('photo'), async (req, res) => {
   try {
-    const { cat_name, color, gender, age, character_desc, health_status, is_neutered, location, longitude, latitude, photo_url, area } = req.body;
+    const { cat_name, color, gender, age, character_desc, health_status, is_neutered, location, longitude, latitude, area } = req.body;
+    const photo_url = req.file ? `/uploads/${req.file.filename}` : null;
     const [result] = await pool.query(
       'INSERT INTO cats (cat_name, color, gender, age, character_desc, health_status, is_neutered, location, longitude, latitude, photo_url, area) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
       [cat_name, color, gender || '未知', age, character_desc, health_status || '健康', is_neutered || 0, location, longitude, latitude, photo_url, area || '西校区']
@@ -76,13 +89,20 @@ router.post('/', authAdmin, async (req, res) => {
 });
 
 // PUT /api/cats/:id - 管理员更新猫咪
-router.put('/:id', authAdmin, async (req, res) => {
+router.put('/:id', authAdmin, upload.single('photo'), async (req, res) => {
   try {
     const fields = ['cat_name', 'color', 'gender', 'age', 'character_desc', 'health_status', 'is_neutered', 'location', 'longitude', 'latitude', 'photo_url', 'area', 'is_active'];
     const updates = [];
     const values = [];
 
+    // 处理文件上传
+    if (req.file) {
+      updates.push('photo_url = ?');
+      values.push(`/uploads/${req.file.filename}`);
+    }
+
     for (const field of fields) {
+      if (field === 'photo_url') continue; // 已处理
       if (req.body[field] !== undefined) {
         updates.push(`${field} = ?`);
         values.push(req.body[field]);

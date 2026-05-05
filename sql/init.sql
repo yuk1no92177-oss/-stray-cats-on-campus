@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS users (
     phone VARCHAR(20),
     avatar_url VARCHAR(255) COMMENT '头像URL',
     role ENUM('user','admin') DEFAULT 'user',
+    is_banned TINYINT DEFAULT 0 COMMENT '是否被封禁',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP
 ) COMMENT='用户表';
 
@@ -133,11 +134,14 @@ INSERT INTO cats (cat_name, color, gender, age, character_desc, health_status, i
 INSERT INTO users (username, password, nickname, role) VALUES
 ('admin', '$2b$10$placeholder_will_be_updated_by_app', '管理员', 'admin');
 
--- 插入默认勋章
+-- 插入默认勋章（含低难度勋章）
 INSERT INTO badges (badge_name, badge_desc, icon, condition_type, condition_value) VALUES
 ('初露锋芒', '首次打卡成功', 'medal', 'report_count', 1),
-('寻猫先锋', '打卡10只不同猫咪', 'paw', 'cat_unlocked', 10),
-('热心铲屎官', '累计打卡20次', 'clipboard', 'report_count', 20),
-('投喂达人', '投喂记录50次', 'bowl', 'feed_count', 50),
-('急救天使', '上报3次需救助猫咪', 'first-aid', 'report_count', 3),
-('校园卫士', '连续活跃30天', 'shield', 'days_active', 30);
+('初次邂逅', '投喂第一只猫咪', 'bowl', 'feed_count', 1),
+('探索新手', '打卡过1只猫咪', 'paw', 'cat_unlocked', 1),
+('爱心传递', '累计投喂5次', 'bowl', 'feed_count', 5),
+('热心铲屎官', '累计打卡10次', 'clipboard', 'report_count', 10),
+('投喂达人', '累计投喂20次', 'bowl', 'feed_count', 20),
+('寻猫先锋', '打卡过5只不同猫咪', 'paw', 'cat_unlocked', 5),
+('校园卫士', '打卡过10只不同猫咪', 'paw', 'cat_unlocked', 10),
+('急救天使', '上报3次需救助猫咪', 'first-aid', 'report_count', 3);

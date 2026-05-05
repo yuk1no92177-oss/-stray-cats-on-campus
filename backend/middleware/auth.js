@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const pool = require('../config/db');
 const JWT_SECRET = 'stray_cats_jwt_secret_2024';
 
 // 验证JWT token
@@ -13,7 +14,16 @@ function authToken(req, res, next) {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
-    next();
+
+    // 检查用户是否被封禁
+    pool.query('SELECT is_banned FROM users WHERE id = ?', [decoded.id])
+      .then(([rows]) => {
+        if (rows.length > 0 && rows[0].is_banned) {
+          return res.status(403).json({ code: 403, msg: '账号已被封禁，请联系管理员' });
+        }
+        next();
+      })
+      .catch(() => next());
   } catch (err) {
     return res.status(401).json({ code: 401, msg: '登录已过期，请重新登录' });
   }
